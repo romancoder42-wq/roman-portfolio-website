@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roman Portfolio | Cyber Architect & AI Engineer</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            bg: '#030712',
+                            card: '#0b0f19',
+                            border: '#1e293b',
+                            neon: '#00ffcc',
+                            purple: '#a855f7',
+                            pink: '#ec4899',
+                            green: '#22c55e',
+                            yellow: '#eab308'
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Three.js for 3D Cyber Background -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030712;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #030712;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00ffcc;
+        }
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+        .glass-panel {
+            background: rgba(11, 15, 25, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 255, 204, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .glass-panel-purple {
+            background: rgba(11, 15, 25, 0.8);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(168, 85, 247, 0.25);
+        }
+        .neon-glow-cyan {
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.6), 0 0 20px rgba(0, 255, 204, 0.3);
+        }
+        .neon-box-cyan {
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.25), inset 0 0 15px rgba(0, 255, 204, 0.05);
+        }
+        .neon-box-purple {
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.25);
+        }
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.85; }
+        }
+        .animate-pulse-glow {
+            animation: pulseGlow 4s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-cyber-bg text-slate-100 relative antialiased selection:bg-cyan-500 selection:text-black">
+
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-32 opacity-0 transition-all duration-300 glass-panel border border-cyan-500/40 px-6 py-3 rounded-xl flex items-center space-x-3 shadow-2xl">
+        <div id="toast-icon" class="text-cyan-400 text-xl"><i class="fas fa-terminal"></i></div>
+        <div>
+            <div id="toast-title" class="font-bold text-sm text-cyan-300">System Notification</div>
+            <div id="toast-msg" class="text-xs text-slate-300">Action completed successfully.</div>
+        </div>
+    </div>
+
+    <header class="fixed top-0 left-0 right-0 z-40 glass-panel border-b border-cyan-500/20 px-4 lg:px-8 py-3 transition-all duration-300">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="#" class="flex items-center space-x-3 group">
+                <div class="relative w-10 h-10 rounded-lg bg-gradient-to-tr from-cyan-500 to-purple-600 p-0.5 flex items-center justify-center neon-box-cyan">
+                    <div class="w-full h-full bg-cyber-bg rounded-[6px] flex items-center justify-center font-mono font-bold text-cyan-400 group-hover:bg-transparent group-hover:text-black transition-all">
+                        R
+                    </div>
+                </div>
+                <div>
+                    <span class="font-bold text-lg tracking-wider text-white neon-glow-cyan">ROMAN</span>
+                    <span class="text-xs block text-cyan-400 font-mono">PORTFOLIO.v4.0</span>
+                </div>
+            </a>
+
+            <!-- Desktop Nav -->
+            <nav class="hidden md:flex items-center space-x-6 text-sm font-medium">
+                <a href="#about" class="text-slate-300 hover:text-cyan-400 transition-colors"><i class="fas fa-user-astronaut mr-1.5 text-cyan-500"></i>About</a>
+                <a href="#skills" class="text-slate-300 hover:text-cyan-400 transition-colors"><i class="fas fa-microchip mr-1.5 text-cyan-500"></i>Skills</a>
+                <a href="#gallery" class="text-slate-300 hover:text-cyan-400 transition-colors"><i class="fas fa-images mr-1.5 text-cyan-500"></i>Gallery & AI</a>
+                <a href="#projects" class="text-slate-300 hover:text-cyan-400 transition-colors"><i class="fas fa-cubes mr-1.5 text-cyan-500"></i>1200+ Vault</a>
+                <a href="#terminal" class="text-slate-300 hover:text-cyan-400 transition-colors"><i class="fas fa-terminal mr-1.5 text-cyan-500"></i>Terminal</a>
+                <a href="#contact" class="text-slate-300 hover:text-cyan-400 transition-colors"><i class="fas fa-satellite-dish mr-1.5 text-cyan-500"></i>Contact</a>
+            </nav>
+
+            <!-- Action Controls -->
+            <div class="flex items-center space-x-3">
+                <!-- WhatsApp Channel Button -->
+                <a href="https://whatsapp.com/channel/0029VawwXaeEquiIR1CLXA30" target="_blank" onclick="openWhatsAppChannel(event)" class="hidden sm:flex items-center space-x-2 bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-500/50 text-emerald-400 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all">
+                    <i class="fab fa-whatsapp text-sm"></i>
+                    <span>Roman Empire</span>
+                </a>
+
+                <!-- Developer Mode Toggle -->
+                <button onclick="toggleDeveloperMode()" id="dev-mode-btn" class="relative group overflow-hidden bg-gradient-to-r from-cyan-500/20 to-purple-500/20 hover:from-cyan-500/40 hover:to-purple-500/40 border border-cyan-400/50 px-3.5 py-1.5 rounded-lg text-xs font-mono text-cyan-300 transition-all flex items-center space-x-2">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                    <span id="dev-mode-text">DEV_MODE: OFF</span>
+                </button>
+
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileMenu()" class="md:hidden text-cyan-400 p-2 focus:outline-none">
+                    <i id="mobile-menu-icon" class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden mt-3 pt-3 border-t border-slate-800 flex flex-col space-y-3 pb-2">
+            <a href="#about" onclick="toggleMobileMenu()" class="text-slate-300 hover:text-cyan-400 text-sm py-1"><i class="fas fa-user-astronaut mr-2 text-cyan-500"></i>About</a>
+            <a href="#skills" onclick="toggleMobileMenu()" class="text-slate-300 hover:text-cyan-400 text-sm py-1"><i class="fas fa-microchip mr-2 text-cyan-500"></i>Skills</a>
+            <a href="#gallery" onclick="toggleMobileMenu()" class="text-slate-300 hover:text-cyan-400 text-sm py-1"><i class="fas fa-images mr-2 text-cyan-500"></i>Gallery & AI</a>
+            <a href="#projects" onclick="toggleMobileMenu()" class="text-slate-300 hover:text-cyan-400 text-sm py-1"><i class="fas fa-cubes mr-2 text-cyan-500"></i>1200+ Vault</a>
+            <a href="#terminal" onclick="toggleMobileMenu()" class="text-slate-300 hover:text-cyan-400 text-sm py-1"><i class="fas fa-terminal mr-2 text-cyan-500"></i>Terminal</a>
+            <a href="#contact" onclick="toggleMobileMenu()" class="text-slate-300 hover:text-cyan-400 text-sm py-1"><i class="fas fa-satellite-dish mr-2 text-cyan-500"></i>Contact</a>
+            <a href="https://whatsapp.com/channel/0029VawwXaeEquiIR1CLXA30" target="_blank" class="flex items-center justify-center space-x-2 bg-emerald-600/30 border border-emerald-500 text-emerald-300 py-2 rounded-lg text-xs font-semibold">
+                <i class="fab fa-whatsapp"></i><span>Join Roman Empire Channel</span>
+            </a>
+        </div>
+    </header>
+
+    <section class="relative min-h-screen flex items-center justify-center pt-28 pb-20 px-4 lg:px-8">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full">
+            
+            <!-- Hero Text Content -->
+            <div class="lg:col-span-7 space-y-6 text-center lg:text-left z-10">
+                <div class="inline-flex items-center space-x-2 bg-cyan-950/60 border border-cyan-500/40 px-3 py-1 rounded-full text-xs font-mono text-cyan-300">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                    <span>SYSTEM ONLINE // LEVEL 9 CYBER ARCHITECT</span>
+                </div>
+
+                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-none">
+                    ROMAN <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500">PORTFOLIO</span>
+                </h1>
+
+                <p class="text-lg sm:text-xl text-slate-300 max-w-2xl font-light leading-relaxed">
+                    Cybersecurity Specialist, Offensive Ethical Hacker & Neural AI Developer. Architecting impenetrable digital defense frameworks, custom exploits, and next-gen intelligence engines.
+                </p>
+
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-3 gap-3 max-w-lg mx-auto lg:mx-0 pt-2">
+                    <div class="glass-panel p-3 rounded-xl border border-cyan-500/20 text-center">
+                        <div class="text-2xl font-bold font-mono text-cyan-400">1,250+</div>
+                        <div class="text-[11px] text-slate-400 uppercase tracking-wider">Projects Built</div>
+                    </div>
+                    <div class="glass-panel p-3 rounded-xl border border-purple-500/20 text-center">
+                        <div class="text-2xl font-bold font-mono text-purple-400">99.9%</div>
+                        <div class="text-[11px] text-slate-400 uppercase tracking-wider">Security Rating</div>
+                    </div>
+                    <div class="glass-panel p-3 rounded-xl border border-pink-500/20 text-center">
+                        <div class="text-2xl font-bold font-mono text-pink-400">7+ Yrs</div>
+                        <div class="text-[11px] text-slate-400 uppercase tracking-wider">Elite Experience</div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-4">
+                    <a href="#projects" class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-cyan-500/25 flex items-center space-x-2">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Explore 1200+ Vault</span>
+                    </a>
+                    <a href="https://wa.me/923037224620?text=Hi%20Roman,%20I%20visited%20your%20Portfolio%20and%20want%20to%20collaborate!" target="_blank" class="glass-panel hover:bg-slate-800/80 border border-emerald-500/40 text-emerald-400 font-semibold px-6 py-3 rounded-xl transition-all flex items-center space-x-2">
+                        <i class="fab fa-whatsapp text-lg"></i>
+                        <span>WhatsApp (+92 303 7224620)</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Hero Avatar Display -->
+            <div class="lg:col-span-5 flex justify-center z-10">
+                <div class="relative w-72 h-72 sm:w-96 sm:h-96">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-cyan-500 to-purple-600 rounded-3xl blur-2xl opacity-40 animate-pulse-glow"></div>
+                    
+                    <div class="relative w-full h-full glass-panel rounded-3xl p-3 border-2 border-cyan-500/40 shadow-2xl flex flex-col items-center justify-center group overflow-hidden">
+                        <div class="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent top-0 animate-bounce opacity-75"></div>
+
+                        <div class="w-full h-full rounded-2xl overflow-hidden relative bg-cyber-card flex items-center justify-center">
+                            <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop" alt="Roman Cyber Avatar" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-90">
+                            
+                            <div class="absolute inset-0 bg-[radial-gradient(#00ffcc_1px,transparent_1px)] [background-size:16px_16px] opacity-20 pointer-events-none"></div>
+
+                            <div class="absolute bottom-4 left-4 right-4 glass-panel p-3 rounded-xl border border-cyan-500/30 flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></div>
+                                    <span class="text-xs font-mono text-cyan-300">ROMAN_AI_CORE.exe</span>
+                                </div>
+                                <span class="text-[10px] font-mono bg-cyan-950 text-cyan-400 px-2 py-0.5 rounded border border-cyan-500/40">SECURE</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="about" class="py-20 px-4 lg:px-8 relative">
+        <div class="max-w-7xl mx-auto">
+            
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-xs font-mono text-cyan-400 uppercase tracking-widest bg-cyan-950/50 px-3 py-1 rounded-full border border-cyan-500/30">OPERATOR OVERVIEW</span>
+                <h2 class="text-3xl sm:text-4xl font-bold text-white mt-4">Pioneering Offensive & Defensive Technology</h2>
+                <p class="text-slate-400 mt-2">Roman merges deep cybersecurity vulnerability analysis with autonomous neural networks.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                <!-- Card 1 -->
+                <div class="glass-panel p-8 rounded-2xl border border-cyan-500/20 hover:border-cyan-400/50 transition-all group">
+                    <div class="w-14 h-14 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-2xl mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Red Teaming & Security Audit</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Ethical hacking, payload deployment, exploit development, zero-day mitigation, and military-grade network penetration testing.
+                    </p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="glass-panel p-8 rounded-2xl border border-purple-500/20 hover:border-purple-400/50 transition-all group">
+                    <div class="w-14 h-14 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 text-2xl mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">AI & Neural Engineering</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Constructing custom AI agents, LLM pipelines, autonomous cyber scanners, and high-throughput PyTorch neural classifiers.
+                    </p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="glass-panel p-8 rounded-2xl border border-pink-500/20 hover:border-pink-400/50 transition-all group">
+                    <div class="w-14 h-14 rounded-xl bg-pink-500/10 border border-pink-500/30 flex items-center justify-center text-pink-400 text-2xl mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-cubes"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Full-Stack Cloud Systems</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Designing fault-tolerant microservices, high-speed WebGL visualizations, and end-to-end encrypted cloud micro-architectures.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Skills Progress -->
+            <div id="skills" class="glass-panel p-8 sm:p-12 rounded-3xl border border-cyan-500/30">
+                <div class="flex items-center justify-between mb-8 flex-wrap gap-4">
+                    <div>
+                        <h3 class="text-2xl font-bold text-white">Technical Skill Matrix</h3>
+                        <p class="text-slate-400 text-sm">Real-time benchmark of Roman's core skill capabilities.</p>
+                    </div>
+                    <span class="font-mono text-xs text-cyan-400 bg-cyan-950 px-3 py-1.5 rounded-lg border border-cyan-500/40">STATUS: MAX_PERFORMANCE</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm font-mono">
+                            <span class="text-slate-200">Ethical Hacking & Penetration Testing</span>
+                            <span class="text-cyan-400">98%</span>
+                        </div>
+                        <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800">
+                            <div class="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full" style="width: 98%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm font-mono">
+                            <span class="text-slate-200">Python & AI Neural Systems</span>
+                            <span class="text-purple-400">96%</span>
+                        </div>
+                        <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800">
+                            <div class="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full" style="width: 96%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm font-mono">
+                            <span class="text-slate-200">Cloud & Fullstack Engineering</span>
+                            <span class="text-cyan-400">93%</span>
+                        </div>
+                        <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800">
+                            <div class="h-full bg-gradient-to-r from-cyan-400 to-emerald-400 rounded-full" style="width: 93%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm font-mono">
+                            <span class="text-slate-200">Cryptography & Reverse Engineering</span>
+                            <span class="text-yellow-400">91%</span>
+                        </div>
+                        <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800">
+                            <div class="h-full bg-gradient-to-r from-yellow-500 to-amber-500 rounded-full" style="width: 91%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="gallery" class="py-20 px-4 lg:px-8 bg-gradient-to-b from-transparent via-cyan-950/10 to-transparent">
+        <div class="max-w-7xl mx-auto">
+            
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-xs font-mono text-cyan-400 uppercase tracking-widest bg-cyan-950/50 px-3 py-1 rounded-full border border-cyan-500/30">GALLERY ASSETS</span>
+                <h2 class="text-3xl sm:text-4xl font-bold text-white mt-4">Cyber & AI DP Showcase</h2>
+                <p class="text-slate-400 mt-2">Roman's gallery featuring high-tech AI avatars, cyber dashboards, and neural UI components.</p>
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="flex flex-wrap justify-center gap-3 mb-12">
+                <button onclick="filterGallery('all')" class="gallery-btn active-filter px-5 py-2 rounded-xl text-xs font-mono bg-cyan-500 text-black font-bold transition-all">ALL_ASSETS</button>
+                <button onclick="filterGallery('avatar')" class="gallery-btn px-5 py-2 rounded-xl text-xs font-mono glass-panel hover:border-cyan-400 text-slate-300 transition-all">AI_AVATARS</button>
+                <button onclick="filterGallery('cyber')" class="gallery-btn px-5 py-2 rounded-xl text-xs font-mono glass-panel hover:border-cyan-400 text-slate-300 transition-all">CYBER_OPS</button>
+                <button onclick="filterGallery('code')" class="gallery-btn px-5 py-2 rounded-xl text-xs font-mono glass-panel hover:border-cyan-400 text-slate-300 transition-all">NEURAL_UI</button>
+            </div>
+
+            <!-- Gallery Grid -->
+            <div id="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="gallery-item avatar group relative rounded-2xl overflow-hidden glass-panel border border-cyan-500/30 cursor-pointer h-72" onclick="openLightbox('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop', 'Roman Prime AI Avatar')">
+                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop" alt="Avatar 1" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-cyber-bg via-transparent to-transparent opacity-80 group-hover:opacity-95 transition-opacity"></div>
+                    <div class="absolute bottom-4 left-4 right-4">
+                        <span class="text-[10px] font-mono text-cyan-400 bg-cyan-950 px-2.5 py-1 rounded border border-cyan-500/40">AI_AVATAR</span>
+                        <h4 class="text-white font-bold text-lg mt-2">Roman Prime AI Avatar</h4>
+                    </div>
+                </div>
+
+                <div class="gallery-item cyber group relative rounded-2xl overflow-hidden glass-panel border border-purple-500/30 cursor-pointer h-72" onclick="openLightbox('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1000&auto=format&fit=crop', 'Matrix Cybersecurity Monitor')">
+                    <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=800&auto=format&fit=crop" alt="Cyber 1" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-cyber-bg via-transparent to-transparent opacity-80 group-hover:opacity-95 transition-opacity"></div>
+                    <div class="absolute bottom-4 left-4 right-4">
+                        <span class="text-[10px] font-mono text-purple-400 bg-purple-950 px-2.5 py-1 rounded border border-purple-500/40">CYBER_OPS</span>
+                        <h4 class="text-white font-bold text-lg mt-2">Matrix Threat Monitor</h4>
+                    </div>
+                </div>
+
+                <div class="gallery-item code group relative rounded-2xl overflow-hidden glass-panel border border-pink-500/30 cursor-pointer h-72" onclick="openLightbox('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1000&auto=format&fit=crop', 'Quantum Encryption Terminal UI')">
+                    <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop" alt="Code 1" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-cyber-bg via-transparent to-transparent opacity-80 group-hover:opacity-95 transition-opacity"></div>
+                    <div class="absolute bottom-4 left-4 right-4">
+                        <span class="text-[10px] font-mono text-pink-400 bg-pink-950 px-2.5 py-1 rounded border border-pink-500/40">NEURAL_UI</span>
+                        <h4 class="text-white font-bold text-lg mt-2">Quantum Core Terminal</h4>
+                    </div>
+                </div>
+
+                <div class="gallery-item avatar group relative rounded-2xl overflow-hidden glass-panel border border-cyan-500/30 cursor-pointer h-72" onclick="openLightbox('https://images.unsplash.com/photo-1535223289827-42f1e9919769?q=80&w=1000&auto=format&fit=crop', 'Cyberpunk Hacker Persona')">
+                    <img src="https://images.unsplash.com/photo-1535223289827-42f1e9919769?q=80&w=800&auto=format&fit=crop" alt="Avatar 2" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-cyber-bg via-transparent to-transparent opacity-80 group-hover:opacity-95 transition-opacity"></div>
+                    <div class="absolute bottom-4 left-4 right-4">
+                        <span class="text-[10px] font-mono text-cyan-400 bg-cyan-950 px-2.5 py-1 rounded border border-cyan-500/40">AI_AVATAR</span>
+                        <h4 class="text-white font-bold text-lg mt-2">Cyber Sentinel Persona</h4>
+                    </div>
+                </div>
+
+                <div class="gallery-item cyber group relative rounded-2xl overflow-hidden glass-panel border border-purple-500/30 cursor-pointer h-72" onclick="openLightbox('https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1000&auto=format&fit=crop', 'Neural Defense Command Dashboard')">
+                    <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=800&auto=format&fit=crop" alt="Cyber 2" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-cyber-bg via-transparent to-transparent opacity-80 group-hover:opacity-95 transition-opacity"></div>
+                    <div class="absolute bottom-4 left-4 right-4">
+                        <span class="text-[10px] font-mono text-purple-400 bg-purple-950 px-2.5 py-1 rounded border border-purple-500/40">CYBER_OPS</span>
+                        <h4 class="text-white font-bold text-lg mt-2">Autonomous Defense Hub</h4>
+                    </div>
+                </div>
+
+                <div class="gallery-item code group relative rounded-2xl overflow-hidden glass-panel border border-pink-500/30 cursor-pointer h-72" onclick="openLightbox('https://images.unsplash.com/photo-1607799279861-4dd421887fb3?q=80&w=1000&auto=format&fit=crop', 'Exploit Payload Generator Interface')">
+                    <img src="https://images.unsplash.com/photo-1607799279861-4dd421887fb3?q=80&w=800&auto=format&fit=crop" alt="Code 2" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-cyber-bg via-transparent to-transparent opacity-80 group-hover:opacity-95 transition-opacity"></div>
+                    <div class="absolute bottom-4 left-4 right-4">
+                        <span class="text-[10px] font-mono text-pink-400 bg-pink-950 px-2.5 py-1 rounded border border-pink-500/40">NEURAL_UI</span>
+                        <h4 class="text-white font-bold text-lg mt-2">Payload Generator Interface</h4>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="projects" class="py-20 px-4 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-xs font-mono text-cyan-400 uppercase tracking-widest bg-cyan-950/50 px-3 py-1 rounded-full border border-cyan-500/30">PROJECT REPOSITORY</span>
+                <h2 class="text-3xl sm:text-4xl font-bold text-white mt-4">1,200+ Projects Vault</h2>
+                <p class="text-slate-400 mt-2">Search Roman's massive codebase across Ethical Hacking, AI, Cloud Infrastructure, and Penetration Testing tools.</p>
+            </div>
+
+            <!-- Search & Filter Controls -->
+            <div class="glass-panel p-6 rounded-2xl border border-cyan-500/30 mb-10 flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div class="relative w-full md:w-96">
+                    <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-cyan-400"></i>
+                    <input type="text" id="project-search" placeholder="Search 1,200+ projects..." oninput="filterProjects()" class="w-full bg-slate-900/80 border border-cyan-500/40 rounded-xl pl-11 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-mono">
+                </div>
+
+                <div class="flex flex-wrap gap-2 w-full md:w-auto justify-end">
+                    <button onclick="setProjectCategory('all')" id="cat-all" class="cat-btn px-4 py-2 rounded-xl text-xs font-mono bg-cyan-500 text-black font-bold transition-all">ALL (1250)</button>
+                    <button onclick="setProjectCategory('sec')" id="cat-sec" class="cat-btn px-4 py-2 rounded-xl text-xs font-mono glass-panel hover:border-cyan-400 text-slate-300 transition-all">Cybersecurity (450)</button>
+                    <button onclick="setProjectCategory('ai')" id="cat-ai" class="cat-btn px-4 py-2 rounded-xl text-xs font-mono glass-panel hover:border-cyan-400 text-slate-300 transition-all">AI & LLMs (400)</button>
+                    <button onclick="setProjectCategory('cloud')" id="cat-cloud" class="cat-btn px-4 py-2 rounded-xl text-xs font-mono glass-panel hover:border-cyan-400 text-slate-300 transition-all">Cloud & DevOps (400)</button>
+                </div>
+            </div>
+
+            <!-- Grid output -->
+            <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+            <div class="text-center mt-12">
+                <button onclick="loadMoreProjects()" id="load-more-btn" class="glass-panel hover:bg-cyan-500/10 border border-cyan-500/50 text-cyan-300 font-mono text-xs px-8 py-3 rounded-xl transition-all">
+                    LOAD MORE REPOSITORIES (+50)
+                </button>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="terminal" class="py-20 px-4 lg:px-8 bg-gradient-to-b from-transparent via-purple-950/10 to-transparent">
+        <div class="max-w-4xl mx-auto">
+            
+            <div class="text-center mb-10">
+                <span class="text-xs font-mono text-purple-400 uppercase tracking-widest bg-purple-950/50 px-3 py-1 rounded-full border border-purple-500/30">CLI SHELL</span>
+                <h2 class="text-3xl font-bold text-white mt-3">Roman Secure Terminal</h2>
+                <p class="text-slate-400 text-sm mt-1">Type <code class="text-cyan-400">help</code> for shell commands.</p>
+            </div>
+
+            <div class="glass-panel rounded-2xl border border-cyan-500/40 overflow-hidden shadow-2xl">
+                <div class="bg-slate-900/90 px-4 py-3 border-b border-cyan-500/30 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
+                        <span class="w-3 h-3 rounded-full bg-yellow-500/80 inline-block"></span>
+                        <span class="w-3 h-3 rounded-full bg-green-500/80 inline-block"></span>
+                        <span class="text-xs font-mono text-slate-400 ml-2">romancore@secure-v4:~#</span>
+                    </div>
+                    <div class="flex items-center space-x-2 text-xs font-mono text-cyan-400">
+                        <i class="fas fa-lock"></i>
+                        <span>ENCRYPTED_SSH</span>
+                    </div>
+                </div>
+
+                <div id="terminal-output" class="p-6 font-mono text-sm h-80 overflow-y-auto space-y-2 bg-cyber-bg/90">
+                    <div class="text-cyan-400">Roman Portfolio Secure Console v4.0.2</div>
+                    <div class="text-slate-400">Type <span class="text-yellow-400 font-bold">help</span> to view commands.</div>
+                    <div class="text-emerald-400">Connected to Roman Empire core node.</div>
+                    <br>
+                </div>
+
+                <form onsubmit="handleTerminalCommand(event)" class="bg-slate-950 px-4 py-3 border-t border-cyan-500/20 flex items-center space-x-3">
+                    <span class="text-cyan-400 font-mono text-sm">root@roman:~$</span>
+                    <input type="text" id="terminal-input" autocomplete="off" placeholder="Enter command..." class="w-full bg-transparent text-slate-100 font-mono text-sm focus:outline-none">
+                    <button type="submit" class="text-cyan-400 hover:text-cyan-300 font-mono text-xs px-3 py-1 bg-cyan-950/50 border border-cyan-500/40 rounded">EXECUTE</button>
+                </form>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="contact" class="py-20 px-4 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                
+                <div class="space-y-6">
+                    <span class="text-xs font-mono text-cyan-400 uppercase tracking-widest bg-cyan-950/50 px-3 py-1 rounded-full border border-cyan-500/30">CONTACT UPLINK</span>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-white">Initiate Direct Communication</h2>
+                    <p class="text-slate-400 leading-relaxed">
+                        Ready to secure your corporate infrastructure, deploy custom AI models, or commission high-end web platforms. Contact Roman directly.
+                    </p>
+
+                    <!-- Official WhatsApp Channel Card -->
+                    <div class="glass-panel p-6 rounded-2xl border border-emerald-500/40 bg-gradient-to-r from-emerald-950/30 to-cyber-card flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center text-emerald-400 text-2xl">
+                                <i class="fab fa-whatsapp"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-white font-bold">ROMAN EMPIRE CHANNEL</h4>
+                                <p class="text-xs text-slate-400">Join official updates & cyber drops on WhatsApp.</p>
+                            </div>
+                        </div>
+                        <a href="https://whatsapp.com/channel/0029VawwXaeEquiIR1CLXA30" target="_blank" onclick="openWhatsAppChannel(event)" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-emerald-600/30 whitespace-nowrap">
+                            JOIN CHANNEL
+                        </a>
+                    </div>
+
+                    <!-- Direct Credentials -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <a href="https://wa.me/923037224620" target="_blank" class="glass-panel p-4 rounded-xl border border-cyan-500/20 hover:border-cyan-400 flex items-center space-x-3 transition-all">
+                            <div class="text-cyan-400 text-xl"><i class="fas fa-phone-alt"></i></div>
+                            <div>
+                                <div class="text-[11px] text-slate-400 font-mono">WHATSAPP / PHONE</div>
+                                <div class="text-sm font-bold text-white font-mono">+92 303 7224620</div>
+                            </div>
+                        </a>
+                        <a href="mailto:romancoder19@gmail.com" class="glass-panel p-4 rounded-xl border border-purple-500/20 hover:border-purple-400 flex items-center space-x-3 transition-all">
+                            <div class="text-purple-400 text-xl"><i class="fas fa-envelope"></i></div>
+                            <div>
+                                <div class="text-[11px] text-slate-400 font-mono">OFFICIAL EMAIL</div>
+                                <div class="text-sm font-bold text-white font-mono text-xs">romancoder19@gmail.com</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Form -->
+                <div class="glass-panel p-8 rounded-3xl border border-cyan-500/30">
+                    <h3 class="text-2xl font-bold text-white mb-6">Send Transmission</h3>
+                    <form onsubmit="handleContactSubmit(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-mono text-slate-400 mb-1">YOUR NAME</label>
+                            <input type="text" id="contact-name" required placeholder="Name..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-400 font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-mono text-slate-400 mb-1">YOUR CONTACT / EMAIL</label>
+                            <input type="text" id="contact-email" required placeholder="Email or WhatsApp..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-400 font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-mono text-slate-400 mb-1">TRANSMISSION MESSAGE</label>
+                            <textarea id="contact-msg" rows="4" required placeholder="Message details..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-400 font-mono"></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-cyan-500/25 flex items-center justify-center space-x-2">
+                            <i class="fas fa-paper-plane"></i>
+                            <span>TRANSMIT MESSAGE</span>
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <footer class="glass-panel border-t border-cyan-500/20 py-12 px-4 lg:px-8 text-center text-slate-500 text-xs font-mono">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-2">
+                <span class="text-cyan-400 font-bold">ROMAN PORTFOLIO</span>
+                <span>// ALL RIGHTS RESERVED © 2026</span>
+            </div>
+            <div class="flex items-center space-x-6">
+                <a href="https://whatsapp.com/channel/0029VawwXaeEquiIR1CLXA30" target="_blank" onclick="openWhatsAppChannel(event)" class="hover:text-cyan-400 transition-colors"><i class="fab fa-whatsapp text-lg"></i> Roman Empire Channel</a>
+                <a href="mailto:romancoder19@gmail.com" class="hover:text-cyan-400 transition-colors"><i class="fas fa-envelope text-sm"></i> romancoder19@gmail.com</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4" onclick="closeLightbox()">
+        <div class="relative max-w-4xl w-full glass-panel p-2 rounded-2xl border border-cyan-500/40" onclick="event.stopPropagation()">
+            <button onclick="closeLightbox()" class="absolute -top-4 -right-4 w-10 h-10 rounded-full bg-cyan-500 text-black font-bold flex items-center justify-center z-10 shadow-lg hover:bg-cyan-400">
+                <i class="fas fa-times"></i>
+            </button>
+            <img id="lightbox-img" src="" alt="Expanded View" class="w-full h-auto max-h-[80vh] object-contain rounded-xl">
+            <div id="lightbox-title" class="text-center font-mono text-cyan-300 mt-3 text-sm font-bold"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- Three.js Cyber Background Animation ---
+        let scene, camera, renderer, particles;
+
+        function initThreeJS() {
+            const canvas = document.getElementById('bg-canvas');
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            const particleCount = 1500;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+
+            for (let i = 0; i < particleCount * 3; i++) {
+                positions[i] = (Math.random() - 0.5) * 60;
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            
+            const material = new THREE.PointsMaterial({
+                size: 0.12,
+                color: 0x00ffcc,
+                transparent: true,
+                opacity: 0.7
+            });
+
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            camera.position.z = 25;
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animateThreeJS() {
+            requestAnimationFrame(animateThreeJS);
+            if (particles) {
+                particles.rotation.x += 0.0005;
+                particles.rotation.y += 0.0008;
+            }
+            renderer.render(scene, camera);
+        }
+
+        window.onload = function() {
+            initThreeJS();
+            animateThreeJS();
+            renderProjects();
+        };
+
+        // --- UI Interactions & Helpers ---
+        function showToast(title, msg, iconClass = 'fas fa-terminal') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-msg').innerText = msg;
+            document.getElementById('toast-icon').innerHTML = `<i class="${iconClass}"></i>`;
+            
+            toast.classList.remove('translate-y-32', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-32', 'opacity-0');
+            }, 4000);
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const icon = document.getElementById('mobile-menu-icon');
+            menu.classList.toggle('hidden');
+            icon.className = menu.classList.contains('hidden') ? 'fas fa-bars text-xl' : 'fas fa-times text-xl';
+        }
+
+        let devModeActive = false;
+        function toggleDeveloperMode() {
+            devModeActive = !devModeActive;
+            const btnText = document.getElementById('dev-mode-text');
+            const btn = document.getElementById('dev-mode-btn');
+            
+            if (devModeActive) {
+                btnText.innerText = "DEV_MODE: ACTIVE";
+                btn.classList.add('border-purple-400', 'neon-box-purple');
+                showToast("Developer Mode Active", "Root debug telemetry enabled for Roman.", "fas fa-code");
+                
+                const terminalOutput = document.getElementById('terminal-output');
+                terminalOutput.innerHTML += `<div class="text-purple-400">[DEV_MODE] Override initialized. Roman ID: +923037224620 | romancoder19@gmail.com</div>`;
+                terminalOutput.scrollTop = terminalOutput.scrollHeight;
+            } else {
+                btnText.innerText = "DEV_MODE: OFF";
+                btn.classList.remove('border-purple-400', 'neon-box-purple');
+                showToast("Developer Mode Locked", "Standard user environment restored.", "fas fa-shield-alt");
+            }
+        }
+
+        function openWhatsAppChannel(e) {
+            e.preventDefault();
+            showToast("Redirecting...", "Opening Roman Empire WhatsApp Channel...", "fab fa-whatsapp");
+            setTimeout(() => {
+                window.open('https://whatsapp.com/channel/0029VawwXaeEquiIR1CLXA30', '_blank');
+            }, 800);
+        }
+
+        // --- Gallery Lightbox ---
+        function filterGallery(category) {
+            document.querySelectorAll('.gallery-btn').forEach(btn => {
+                btn.classList.remove('bg-cyan-500', 'text-black', 'font-bold');
+                btn.classList.add('glass-panel', 'text-slate-300');
+            });
+            event.target.classList.remove('glass-panel', 'text-slate-300');
+            event.target.classList.add('bg-cyan-500', 'text-black', 'font-bold');
+
+            document.querySelectorAll('.gallery-item').forEach(item => {
+                item.style.display = (category === 'all' || item.classList.contains(category)) ? 'block' : 'none';
+            });
+        }
+
+        function openLightbox(imgSrc, title) {
+            const modal = document.getElementById('lightbox');
+            document.getElementById('lightbox-img').src = imgSrc;
+            document.getElementById('lightbox-title').innerText = title;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeLightbox() {
+            const modal = document.getElementById('lightbox');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }
+
+        // --- Massive 1200+ Projects Generator ---
+        const projectCategories = ['sec', 'ai', 'cloud'];
+        const projectNames = [
+            "Roman VulnScanner", "Neural Defense Grid", "ZeroDay Exploit Engine", "Quantum Cryptography Suite",
+            "AI Cyber Threat Hunter", "Distributed Cloud Mesh", "RedTeam Automator CLI", "DeepFake AI Guardian",
+            "Smart Contract Security Auditor", "Reconnaissance Bot Agent", "Neural Core Assistant", "Firewall Bypass Simulator"
+        ];
+
+        let allProjects = [];
+        for (let i = 1; i <= 1250; i++) {
+            const cat = projectCategories[(i - 1) % projectCategories.length];
+            const baseName = projectNames[(i - 1) % projectNames.length];
+            allProjects.push({
+                id: i,
+                name: `${baseName} v${(i % 5) + 1}.${i % 9}`,
+                category: cat,
+                description: `High-performance ${cat.toUpperCase()} repository built by Roman for enterprise defense, neural automation, and cloud scalability.`,
+                stars: 12 + (i * 7) % 980,
+                forks: 3 + (i * 3) % 210,
+                tag: cat === 'sec' ? 'Cybersecurity' : cat === 'ai' ? 'Artificial Intelligence' : 'Cloud & DevOps'
+            });
+        }
+
+        let currentCategory = 'all';
+        let searchQuery = '';
+        let displayedCount = 9;
+
+        function renderProjects() {
+            const grid = document.getElementById('projects-grid');
+            grid.innerHTML = '';
+
+            let filtered = allProjects.filter(p => {
+                const matchesCat = currentCategory === 'all' || p.category === currentCategory;
+                const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.description.toLowerCase().includes(searchQuery.toLowerCase());
+                return matchesCat && matchesSearch;
+            });
+
+            const toDisplay = filtered.slice(0, displayedCount);
+
+            if (toDisplay.length === 0) {
+                grid.innerHTML = `<div class="col-span-3 text-center py-12 text-slate-400 font-mono">No matching repositories found.</div>`;
+                document.getElementById('load-more-btn').style.display = 'none';
+                return;
+            }
+
+            toDisplay.forEach(p => {
+                const badgeColor = p.category === 'sec' ? 'text-cyan-400 bg-cyan-950 border-cyan-500/40' : p.category === 'ai' ? 'text-purple-400 bg-purple-950 border-purple-500/40' : 'text-emerald-400 bg-emerald-950 border-emerald-500/40';
+                
+                const card = document.createElement('div');
+                card.className = "glass-panel p-6 rounded-2xl border border-slate-800 hover:border-cyan-400/50 transition-all flex flex-col justify-between group";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-[10px] font-mono px-2.5 py-1 rounded border ${badgeColor}">${p.tag}</span>
+                            <span class="text-xs font-mono text-slate-500">#${p.id}</span>
+                        </div>
+                        <h4 class="text-white font-bold text-lg group-hover:text-cyan-400 transition-colors">${p.name}</h4>
+                        <p class="text-slate-400 text-xs mt-2 leading-relaxed">${p.description}</p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-slate-400">
+                        <div class="flex items-center space-x-3">
+                            <span><i class="fas fa-star text-yellow-400 mr-1"></i>${p.stars}</span>
+                            <span><i class="fas fa-code-branch text-cyan-400 mr-1"></i>${p.forks}</span>
+                        </div>
+                        <button onclick="showToast('Repository Loaded', 'Opening source view for ${p.name}', 'fas fa-code')" class="text-cyan-400 hover:text-cyan-300 font-bold">SOURCE <i class="fas fa-external-link-alt ml-1"></i></button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            const loadMoreBtn = document.getElementById('load-more-btn');
+            loadMoreBtn.style.display = (displayedCount >= filtered.length) ? 'none' : 'inline-block';
+        }
+
+        function setProjectCategory(cat) {
+            currentCategory = cat;
+            displayedCount = 9;
+            
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.classList.remove('bg-cyan-500', 'text-black', 'font-bold');
+                btn.classList.add('glass-panel', 'text-slate-300');
+            });
+            document.getElementById(`cat-${cat}`).classList.remove('glass-panel', 'text-slate-300');
+            document.getElementById(`cat-${cat}`).classList.add('bg-cyan-500', 'text-black', 'font-bold');
+
+            renderProjects();
+        }
+
+        function filterProjects() {
+            searchQuery = document.getElementById('project-search').value;
+            displayedCount = 9;
+            renderProjects();
+        }
+
+        function loadMoreProjects() {
+            displayedCount += 50;
+            renderProjects();
+            showToast('Vault Expanded', `Loaded 50 more repositories. Total visible: ${displayedCount}`, 'fas fa-cubes');
+        }
+
+        // --- Interactive Terminal ---
+        function handleTerminalCommand(e) {
+            e.preventDefault();
+            const input = document.getElementById('terminal-input');
+            const cmd = input.value.trim().toLowerCase();
+            const output = document.getElementById('terminal-output');
+
+            if (!cmd) return;
+
+            output.innerHTML += `<div class="text-slate-200">root@roman:~$ <span class="text-cyan-400">${escapeHtml(cmd)}</span></div>`;
+
+            let response = "";
+            switch (cmd) {
+                case 'help':
+                    response = `<div class="text-yellow-300">Available System Commands:</div>
+                        <div class="text-slate-300">- <span class="text-cyan-400">about</span>: Roman biography overview.</div>
+                        <div class="text-slate-300">- <span class="text-cyan-400">email</span>: Show official email address.</div>
+                        <div class="text-slate-300">- <span class="text-cyan-400">whatsapp</span>: Open Roman Empire WhatsApp Channel.</div>
+                        <div class="text-slate-300">- <span class="text-cyan-400">projects</span>: Display vault project count.</div>
+                        <div class="text-slate-300">- <span class="text-cyan-400">clear</span>: Clear terminal console.</div>`;
+                    break;
+                case 'about':
+                    response = `<div class="text-slate-300">ROMAN: Cybersecurity Architect & AI Engineer. Operating Roman Empire network platforms globally.</div>`;
+                    break;
+                case 'email':
+                    response = `<div class="text-purple-400">[+] Official Contact Email: romancoder19@gmail.com</div>`;
+                    break;
+                case 'whatsapp':
+                    response = `<div class="text-emerald-400">[+] Opening Roman Empire WhatsApp Channel (+92 303 7224620)...</div>`;
+                    window.open('https://whatsapp.com/channel/0029VawwXaeEquiIR1CLXA30', '_blank');
+                    break;
+                case 'projects':
+                    response = `<div class="text-cyan-400">[+] Vault loaded with 1,250+ enterprise repositories.</div>`;
+                    break;
+                case 'clear':
+                    output.innerHTML = '';
+                    input.value = '';
+                    return;
+                default:
+                    response = `<div class="text-red-400">Command not recognized: '${escapeHtml(cmd)}'. Type 'help' for available commands.</div>`;
+            }
+
+            output.innerHTML += `<div>${response}</div><br>`;
+            input.value = '';
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function handleContactSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('contact-name').value;
+            showToast("Message Transmitted", `Thank you ${name}! Your transmission has been sent to romancoder19@gmail.com`, "fas fa-satellite-dish");
+            e.target.reset();
+        }
+    </script>
+</body>
+</html>
